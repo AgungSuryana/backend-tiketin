@@ -4,20 +4,20 @@ const { authenticateToken, authorizeRole } = require("../middleware/authenticate
 const router = express.Router();
 
 // Get all submitted packages for a user
+// Get all submitted packages
 router.get("/", authenticateToken, (req, res) => {
-    const userNik = req.user.nik;
-
-    db.query("SELECT * FROM paket_diajukan", [userNik], (err, results) => {
+    // Ambil seluruh data paket_diajukan tanpa filter berdasarkan nik
+    db.query("SELECT * FROM paket_diajukan", (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });
 });
 
 // Get single submitted package
-router.get("/:id_paket_diajukan", authenticateToken, (req, res) => {
-    const { id_paket_diajukan } = req.params;
+router.get("/:nik", authenticateToken, (req, res) => {
+    const { nik } = req.params;
 
-    db.query("SELECT * FROM paket_diajukan WHERE id_paket_diajukan = ?", [id_paket_diajukan], (err, results) => {
+    db.query("SELECT * FROM paket_diajukan WHERE nik = ?", [nik], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) return res.status(404).json({ message: "Submitted package not found" });
         res.json(results[0]);
