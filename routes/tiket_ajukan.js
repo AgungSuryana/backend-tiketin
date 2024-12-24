@@ -60,22 +60,44 @@ router.post("/", authenticateToken, (req, res) => {
     );
 });
 
-// Update a submitted ticket by ID
-router.put("/:id_tiket", authenticateToken, (req, res) => {
-    const { id_tiket } = req.params;
-    const { nama_acara, lokasi, tanggal_acara, poster, deskripsi, status_pengajuan } = req.body;
+// // Update a submitted ticket by ID
+// router.put("/:id_tiket", authenticateToken, (req, res) => {
+//     const { id_tiket } = req.params;
+//     const { nama_acara, lokasi, tanggal_acara, poster, deskripsi, status_pengajuan } = req.body;
 
-    const query =
-        "UPDATE tiket_diajukan SET nama_acara = ?, lokasi = ?, tanggal_acara = ?, poster = ?, deskripsi = ?, status_pengajuan = ? WHERE id_tiket = ?";
-    db.query(
-        query,
-        [nama_acara, lokasi, tanggal_acara, poster, deskripsi, status_pengajuan, id_tiket],
-        (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: "Submitted ticket updated successfully" });
-        }
-    );
+//     const query =
+//         "UPDATE tiket_diajukan SET nama_acara = ?, lokasi = ?, tanggal_acara = ?, poster = ?, deskripsi = ?, status_pengajuan = ? WHERE id_tiket = ?";
+//     db.query(
+//         query,
+//         [nama_acara, lokasi, tanggal_acara, poster, deskripsi, status_pengajuan, id_tiket],
+//         (err) => {
+//             if (err) return res.status(500).json({ error: err.message });
+//             res.json({ message: "Submitted ticket updated successfully" });
+//         }
+//     );
+// });
+
+// Update the status of a submitted ticket by NIK
+router.put("/:nik", authenticateToken, (req, res) => {
+    const { nik } = req.params;
+    const { status_pengajuan } = req.body;
+
+    // Pastikan status_pengajuan valid
+    if (!['Disetujui', 'Pending', 'Ditolak'].includes(status_pengajuan)) {
+        return res.status(400).json({ error: 'Invalid status_pengajuan' });
+    }
+
+    const query = `
+        UPDATE tiket_diajukan 
+        SET status_pengajuan = ? 
+        WHERE nik = ?`;
+
+    db.query(query, [status_pengajuan, nik], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Status pengajuan berhasil diperbarui" });
+    });
 });
+
 
 // Delete a submitted ticket by ID
 router.delete("/:id_tiket", authenticateToken, (req, res) => {
