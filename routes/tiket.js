@@ -4,20 +4,20 @@ const { authenticateToken, authorizeRole } = require("../middleware/authenticate
 const router = express.Router();
 
 // Get all tickets (Accessible to all authenticated users)
-router.get("/", authenticateToken, (req, res) => {
+router.get("/all", (req, res) => {
     db.query("SELECT * FROM tiket", (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });
 });
 
-// // Get all tickets (Accessible only to admins)
-// router.get("/", authenticateToken, authorizeRole('admin'), (req, res) => {
-//     db.query("SELECT * FROM tiket", (err, results) => {
-//         if (err) return res.status(500).json({ error: err.message });
-//         res.json(results);
-//     });
-// });
+// Get all tickets (Accessible only to admins)
+router.get("/", authenticateToken, authorizeRole('admin'), (req, res) => {
+    db.query("SELECT * FROM tiket", (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
 
 
 // Get single ticket (Accessible to all authenticated users)

@@ -23,6 +23,17 @@ router.get("/:id_paket", authenticateToken, (req, res) => {
         res.status(200).json(results[0]);
     });
 });
+router.get("/tiket/:id_tiket", (req, res) => {
+    const { id_tiket } = req.params;
+
+    db.query("SELECT * FROM paket WHERE id_tiket = ?", [id_tiket], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (results.length === 0) {
+            return res.status(404).json({ message: "Package not found" });
+        }
+        res.status(200).json(results);
+    });
+});
 
 // Create a new package
 router.post("/", authenticateToken, authorizeRole("admin"), (req, res) => {

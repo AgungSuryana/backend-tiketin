@@ -17,6 +17,8 @@ router.get("/", authenticateToken, (req, res) => {
     });
 });
 
+
+
 // Get all submitted tickets for a specific NIK
 router.get("/:nik", authenticateToken, (req, res) => {
     const { nik } = req.params;
