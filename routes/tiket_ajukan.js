@@ -71,6 +71,11 @@ router.put("/:id_tiket_ajukan", authenticateToken, async (req, res) => {
         return res.status(400).json({ error: 'Invalid status_pengajuan' });
     }
 
+    // Validasi bahwa semua parameter yang diperlukan ada dan tidak undefined
+    if (!kategori || !nama_acara || !lokasi || !tanggal_acara || !poster || !deskripsi || !nik) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
+
     const query = `
         UPDATE tiket_diajukan 
         SET status_pengajuan = ? 
@@ -87,7 +92,16 @@ router.put("/:id_tiket_ajukan", authenticateToken, async (req, res) => {
                 INSERT INTO Tiket (kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, 'Tersedia', NOW(), NOW())
             `;
-            const result = await db.execute(insertTiketQuery, [kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi]);
+
+            // Pastikan tidak ada undefined yang dikirimkan
+            const result = await db.execute(insertTiketQuery, [
+                kategori || null,
+                nama_acara || null,
+                lokasi || null,
+                tanggal_acara || null,
+                poster || null,
+                deskripsi || null
+            ]);
             const newTiketId = result[0].insertId;
 
             // Menyisipkan data paket terkait dari Paket_Diajukan ke Paket
