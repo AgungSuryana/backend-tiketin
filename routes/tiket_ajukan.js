@@ -66,58 +66,42 @@ router.put("/:id_tiket_ajukan", authenticateToken, async (req, res) => {
     const { id_tiket_ajukan } = req.params;
     const { status_pengajuan, kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, nik } = req.body;
 
-    // Validasi status_pengajuan
+    // Pastikan status_pengajuan valid
     if (!['Disetujui', 'Pending', 'Ditolak'].includes(status_pengajuan)) {
         return res.status(400).json({ error: 'Invalid status_pengajuan' });
     }
 
-    // Validasi data yang diperlukan tidak undefined
-    if (!kategori || !nama_acara || !lokasi || !tanggal_acara || !poster || !deskripsi || !nik) {
-        return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    const queryUpdate = `
+    const query = `
         UPDATE tiket_diajukan 
         SET status_pengajuan = ? 
         WHERE id_tiket_ajukan = ?
     `;
 
     try {
-        // Ambil data lama sebelum diupdate
-        const [oldData] = await db.query("SELECT status_pengajuan FROM tiket_diajukan WHERE id_tiket_ajukan = ?", [id_tiket_ajukan]);
-
-        if (!oldData) return res.status(404).json({ error: "Data tidak ditemukan" });
-
-        // Update status_pengajuan
-        await db.execute(queryUpdate, [status_pengajuan, id_tiket_ajukan]);
+        await db.execute(query, [status_pengajuan, id_tiket_ajukan]);
 
         // Jika status_pengajuan berubah menjadi 'Disetujui'
-        if (status_pengajuan === "Disetujui" && oldData.status_pengajuan !== "Disetujui") {
-            // Masukkan data ke tabel Tiket
-            const result = await db.execute(
-                `
-                INSERT INTO tiket (kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status, created_at, updated_at) 
+        if (status_pengajuan === 'Disetujui') {
+            // Menyisipkan data ke tabel Tiket
+            const insertTiketQuery = `
+                INSERT INTO Tiket (kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, 'Tersedia', NOW(), NOW())
-                `,
-                [kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi]
-            );
-
+            `;
+            const result = await db.execute(insertTiketQuery, [kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi]);
             const newTiketId = result[0].insertId;
 
-            // Masukkan data ke tabel Paket
-            await db.execute(
-                `
-                INSERT INTO paket (id_tiket, nama_paket, harga_paket, gambar_venue, deskripsi_paket, created_at, updated_at) 
-                SELECT ?, nama_paket, harga_paket, gambar_venue, deskripsi_paket, NOW(), NOW() 
-                FROM Paket_Diajukan WHERE nik = ?
-                `,
-                [newTiketId, nik]
-            );
+            // Menyisipkan data paket terkait dari Paket_Diajukan ke Paket
+            const insertPaketQuery = `
+                INSERT INTO Paket (id_tiket, nama_paket, harga_paket, gambar_venue, deskripsi_paket, created_at, updated_at)
+                SELECT ?, nama_paket, harga_paket, gambar_venue, deskripsi_paket, NOW(), NOW()
+                FROM Paket_Diajukan
+                WHERE nik = ?
+            `;
+            await db.execute(insertPaketQuery, [newTiketId, nik]);
         }
 
         res.json({ message: "Status pengajuan berhasil diperbarui" });
     } catch (err) {
-        console.error(err);
         return res.status(500).json({ error: err.message });
     }
 });
