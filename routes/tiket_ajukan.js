@@ -62,7 +62,6 @@ router.post("/", async (req, res) => {
     }
 });
 
-// Update the status of a submitted ticket by id_tiket_ajukan
 router.put("/:id_tiket_ajukan", authenticateToken, async (req, res) => {
     const { id_tiket_ajukan } = req.params;
     const { status_pengajuan, kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, nik } = req.body;
@@ -70,6 +69,11 @@ router.put("/:id_tiket_ajukan", authenticateToken, async (req, res) => {
     // Validasi status_pengajuan
     if (!['Disetujui', 'Pending', 'Ditolak'].includes(status_pengajuan)) {
         return res.status(400).json({ error: 'Invalid status_pengajuan' });
+    }
+
+    // Validasi data yang diperlukan tidak undefined
+    if (!kategori || !nama_acara || !lokasi || !tanggal_acara || !poster || !deskripsi || !nik) {
+        return res.status(400).json({ error: 'All fields are required' });
     }
 
     const queryUpdate = `
@@ -117,6 +121,7 @@ router.put("/:id_tiket_ajukan", authenticateToken, async (req, res) => {
         return res.status(500).json({ error: err.message });
     }
 });
+
 
 
 // Get tickets status for a specific NIK (by no_telp)
