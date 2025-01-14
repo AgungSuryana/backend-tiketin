@@ -1,15 +1,18 @@
-const mysql = require("mysql");
-require("dotenv").config();
-
 const mysql = require('mysql2');
 
-const db = mysql.createConnection("mysql://uvhda4dehpdmuhys:WpUZ18HSrgTr6bLsRiRn@bpu871t0hx7db2sl1v8u-mysql.services.clever-cloud.com:3306/bpu871t0hx7db2sl1v8u");
+const db = mysql.createConnection({
+    host: "bpu871t0hx7db2sl1v8u-mysql.services.clever-cloud.com",
+    user: "uvhda4dehpdmuhys",
+    password: "WpUZ18HSrgTr6bLsRiRn",
+    database: "bpu871t0hx7db2sl1v8u",
+    port: 3306
+});
 
 db.connect((err) => {
     if (err) {
-        console.error('Database connection error:', err.message);
+        console.error('Database connection failed:', err.message);
     } else {
-        console.log('Connected to the database.');
+        console.log('Connected to the database!');
     }
 });
 
