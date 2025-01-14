@@ -92,7 +92,7 @@ router.put("/:id_tiket_ajukan", authenticateToken, async (req, res) => {
             // Masukkan data ke tabel Tiket
             const result = await db.execute(
                 `
-                INSERT INTO Tiket (kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status, created_at, updated_at) 
+                INSERT INTO tiket (kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status, created_at, updated_at) 
                 VALUES (?, ?, ?, ?, ?, ?, 'Tersedia', NOW(), NOW())
                 `,
                 [kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi]
@@ -103,7 +103,7 @@ router.put("/:id_tiket_ajukan", authenticateToken, async (req, res) => {
             // Masukkan data ke tabel Paket
             await db.execute(
                 `
-                INSERT INTO Paket (id_tiket, nama_paket, harga_paket, gambar_venue, deskripsi_paket, created_at, updated_at) 
+                INSERT INTO paket (id_tiket, nama_paket, harga_paket, gambar_venue, deskripsi_paket, created_at, updated_at) 
                 SELECT ?, nama_paket, harga_paket, gambar_venue, deskripsi_paket, NOW(), NOW() 
                 FROM Paket_Diajukan WHERE nik = ?
                 `,
