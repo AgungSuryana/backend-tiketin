@@ -1,6 +1,6 @@
 const mysql = require('mysql2');
 
-const db = mysql.createConnection({
+const pool = mysql.createPool({
     host: "bpu871t0hx7db2sl1v8u-mysql.services.clever-cloud.com",
     user: "uvhda4dehpdmuhys",
     password: "WpUZ18HSrgTr6bLsRiRn",
@@ -11,12 +11,5 @@ const db = mysql.createConnection({
     queueLimit: 0
 });
 
-db.connect((err) => {
-    if (err) {
-        console.error('Database connection failed:', err.message);
-    } else {
-        console.log('Connected to the database!');
-    }
-});
-
-module.exports = db;
+// Gunakan pool.promise() untuk mendapatkan fungsi yang mendukung async/await
+module.exports = pool.promise();

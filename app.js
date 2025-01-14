@@ -18,13 +18,13 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-db.connect((err) => {
-    if (err) {
-        console.error("Database connection failed:", err.message);
-    } else {
-        console.log("Connected to the database");
-    }
-});
+// db.connect((err) => {
+//     if (err) {
+//         console.error("Database connection failed:", err.message);
+//     } else {
+//         console.log("Connected to the database");
+//     }
+// });
 
 const usersRoutes = require("./routes/users");
 const tiketRoutes = require("./routes/tiket");
