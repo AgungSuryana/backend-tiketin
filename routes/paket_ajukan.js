@@ -24,18 +24,27 @@ router.get("/:nik", authenticateToken, (req, res) => {
     });
 });
 
-// Create a new submitted package
-router.post("/", authenticateToken, (req, res) => {
-    const userNik = req.user.nik;
-    const { nama_paket, harga_paket, gambar_venue, deskripsi_paket } = req.body;
+router.post("/", (req, res) => {
+    const { nik, id_tiket_ajukan, nama_paket, harga_paket, gambar_venue, deskripsi_paket } = req.body;
 
     const query =
-        "INSERT INTO paket_diajukan (nik, nama_paket, harga_paket, gambar_venue, deskripsi_paket) VALUES (?, ?, ?, ?, ?)";
-    db.query(query, [userNik, nama_paket, harga_paket, gambar_venue, deskripsi_paket], (err) => {
-        if (err) return res.status(500).json({ error: err.message });
+        "INSERT INTO paket_diajukan (nik, id_tiket_ajukan, nama_paket, harga_paket, gambar_venue, deskripsi_paket) VALUES (?, ?, ?, ?, ?, ?)";
+
+    db.query(query, [nik, id_tiket_ajukan, nama_paket, harga_paket, gambar_venue, deskripsi_paket], (err) => {
+        if (err) {
+            if (err.code === 'ER_NO_REFERENCED_ROW_2') {
+                // Handle foreign key error (nik or id_tiket_ajukan not found)
+                return res.status(400).json({
+                    error: `Error:Pastikan nik atau id_tiket_ajukan valid dan ada di database.`
+                });
+            }
+            return res.status(500).json({ error: err.message });
+        }
         res.status(201).json({ message: "Submitted package created successfully" });
     });
 });
+
+
 
 // Update a submitted package
 router.put("/:id_paket_diajukan", authenticateToken, (req, res) => {

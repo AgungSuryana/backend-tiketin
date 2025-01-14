@@ -5,10 +5,10 @@ const { authenticateToken } = require("../middleware/authenticateToken");
 const router = express.Router();
 
 // Daftar kategori yang diperbolehkan
-const allowedCategories = ['seminar', 'konser', 'sports', 'pameran'];
+const allowedCategories = ['seminar', 'konser', 'sport', 'pameran'];
 
 // Get all submitted tickets for a specific NIK
-router.get("/", authenticateToken, (req, res) => {
+router.get("/",(req, res) => {
     // Ambil seluruh data tanpa filter berdasarkan nik
     db.query("SELECT * FROM tiket_diajukan", (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -20,10 +20,10 @@ router.get("/", authenticateToken, (req, res) => {
 
 
 // Get all submitted tickets for a specific NIK
-router.get("/:nik", authenticateToken, (req, res) => {
-    const { nik } = req.params;
+router.get("/:no_telp", (req, res) => {
+    const { no_telp } = req.params;
 
-    db.query("SELECT * FROM tiket_diajukan WHERE nik = ?", [nik], (err, results) => {
+    db.query("SELECT * FROM tiket_diajukan WHERE no_telp= ?", [no_telp], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         if (results.length === 0) return res.status(404).json({ message: "No tickets found for this NIK" });
         res.json(results);
@@ -42,9 +42,8 @@ router.get("/detail/:id_tiket", authenticateToken, (req, res) => {
 });
 
 // Create a new submitted ticket
-router.post("/", authenticateToken, (req, res) => {
-    const userNik = req.user.nik;
-    const { no_telp, kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status_pengajuan } = req.body;
+router.post("/", (req, res) => {
+    const { nik, no_telp, kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status_pengajuan } = req.body;
 
     if (!allowedCategories.includes(kategori)) {
         return res.status(400).json({ error: `Kategori harus salah satu dari: ${allowedCategories.join(', ')}` });
@@ -54,7 +53,7 @@ router.post("/", authenticateToken, (req, res) => {
         "INSERT INTO tiket_diajukan (nik, no_telp, kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status_pengajuan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     db.query(
         query,
-        [userNik, no_telp, kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status_pengajuan || "Pending"],
+        [nik, no_telp, kategori, nama_acara, lokasi, tanggal_acara, poster, deskripsi, status_pengajuan || "Pending"],
         (err) => {
             if (err) return res.status(500).json({ error: err.message });
             res.status(201).json({ message: "Submitted ticket created successfully" });
@@ -79,9 +78,9 @@ router.post("/", authenticateToken, (req, res) => {
 //     );
 // });
 
-// Update the status of a submitted ticket by NIK
-router.put("/:nik", authenticateToken, (req, res) => {
-    const { nik } = req.params;
+// Update the status of a submitted ticket by id_tiket_diajukan
+router.put("/:id_tiket_ajukan", authenticateToken, (req, res) => {
+    const { id_tiket_ajukan } = req.params;  // Sesuaikan dengan parameter URL yang benar
     const { status_pengajuan } = req.body;
 
     // Pastikan status_pengajuan valid
@@ -92,11 +91,23 @@ router.put("/:nik", authenticateToken, (req, res) => {
     const query = `
         UPDATE tiket_diajukan 
         SET status_pengajuan = ? 
-        WHERE nik = ?`;
+        WHERE id_tiket_ajukan = ?`;  // Pastikan query juga menggunakan id_tiket_ajukan
 
-    db.query(query, [status_pengajuan, nik], (err) => {
+    db.query(query, [status_pengajuan, id_tiket_ajukan], (err) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ message: "Status pengajuan berhasil diperbarui" });
+    });
+});
+
+
+
+router.get("/status/:no_telp", (req, res) => {
+    const { no_telp } = req.params;
+
+    db.query("SELECT * FROM tiket_diajukan WHERE no_telp = ?", [no_telp], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (results.length === 0) return res.status(404).json({ message: "No tickets found for this NIK" });
+        res.json(results);
     });
 });
 
