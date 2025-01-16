@@ -8,7 +8,7 @@ require("dotenv").config();
 const app = express();
 
 const corsOptions = {
-    origin: "https://frontend-tiketin.vercel.app/", // Ganti dengan domain yang diizinkan
+    origin: "https://frontend-tiketin.vercel.app", // Ganti dengan domain yang diizinkan
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
